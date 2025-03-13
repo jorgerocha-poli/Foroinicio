@@ -1,0 +1,18 @@
+import java.util.Scanner;
+
+public class ParImpar {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        // Read the integer number from the input
+        int number = scanner.nextInt();
+
+        // Use the modulo operator to determine if the number is even or odd
+        // The % operator returns the remainder of the division
+        // If the remainder is 0, the number is even; otherwise, it is odd
+        String result = (number % 2 == 0) ? "even" : "odd";
+
+        // Print the result
+        System.out.println(result);
+    }
+}
