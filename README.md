@@ -4,7 +4,7 @@ Explanation:
 o	If number % 2 == 0, the number is even (it prints "even").
 o	If the number is not divisible by 2 (i.e., the remainder is not 0), the number is odd (it prints "odd").
 3.	Result: The result is stored in the variable result which contains either "even" or "odd", depending on the outcome of the operation, and it is printed to the output.
-Example Execution:
+Example Execution:.
 •	Input: 126
 •	Output: even
 •	Input: 35
