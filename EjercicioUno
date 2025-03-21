@@ -1,0 +1,238 @@
+package EjercicioUno;
+	import java.io.BufferedWriter;
+	import java.io.File;
+	import java.io.FileWriter;
+	import java.io.IOException;
+	import java.util.ArrayList;
+	import java.util.List;
+	import java.util.Random;
+	import java.time.LocalDate;
+	import java.time.format.DateTimeFormatter;
+
+	/**
+	 * Utility class that generates sample business data files
+	 * for the sales reporting system demonstration.
+	 */
+	public class GenerateInfoFiles {
+	    
+	    // Output directory name
+	    private static final String OUTPUT_FOLDER = "filegenerate/";
+	    
+	    // Random generator
+	    private static final Random randomizer = new Random();
+	    
+	    // Data for generation
+	    private static final String[] ID_PREFIXES = {"DNI", "RUC", "PAS", "EXT", "CIF"};
+	    private static final String[] EMPLOYEE_FIRST_NAMES = {"Roberto", "Lucía", "Fernando", "Alejandra", "Javier", "Gabriela", "Andrés", "Carolina", "Emilio", "Isabel", "Héctor", "Patricia", "Tomás", "Beatriz"};
+	    private static final String[] EMPLOYEE_LAST_NAMES = {"Fernández", "Vargas", "Mendoza", "Silva", "Ortega", "Ríos", "Castro", "Paredes", "Zamora", "Núñez", "Escobar", "Herrera", "Vega", "Molina"};
+	    private static final String[] MERCHANDISE = {"Computador portátil", "Teléfono avanzado", "Auriculares", "Teclado ergonómico", "Monitor UltraHD", "Mouse inalámbrico", "Cámara web", "Tablet", "Altavoces", "Disco SSD", "Memoria RAM", "Router WiFi", "Unidad USB", "Mochila para laptop"};
+	    private static final String[] CATEGORIES = {"Electrónica", "Informática", "Comunicación", "Periféricos", "Almacenamiento", "Accesorios"};
+	    
+	    /**
+	     * Main method to execute the data generation
+	     * @param args Command line arguments [employeeCount] [merchandiseCount]
+	     */
+	    public static void main(String[] args) {
+	        System.out.println("Iniciando generación de archivos de muestra...");
+	        
+	        try {
+	            // Create output directory
+	            createDirectory();
+	            
+	            // Set default counts
+	            int employeeCount = 8;
+	            int merchandiseCount = 15;
+	            
+	            // Parse command line arguments if provided
+	            if (args.length > 0) {
+	                try {
+	                    employeeCount = Integer.parseInt(args[0]);
+	                } catch (NumberFormatException e) {
+	                    System.out.println("Argumento para número de empleados inválido. Usando valor predeterminado: " + employeeCount);
+	                }
+	            }
+	            
+	            if (args.length > 1) {
+	                try {
+	                    merchandiseCount = Integer.parseInt(args[1]);
+	                } catch (NumberFormatException e) {
+	                    System.out.println("Argumento para número de productos inválido. Usando valor predeterminado: " + merchandiseCount);
+	                }
+	            }
+	            
+	            // Generate data files
+	            List<String> employeeIds = generateEmployeeFile(employeeCount);
+	            generateMerchandiseFile(merchandiseCount);
+	            generateTransactionFiles(employeeIds, merchandiseCount);
+	            
+	            System.out.println("Generación de archivos completada exitosamente.");
+	            System.out.println("Archivos generados en la carpeta: " + OUTPUT_FOLDER);
+	            
+	        } catch (IOException e) {
+	            System.err.println("Error durante la generación de archivos: " + e.getMessage());
+	            e.printStackTrace();
+	        }
+	    }
+	    
+	    /**
+	     * Creates the output directory if it doesn't exist
+	     * @throws IOException if directory creation fails
+	     */
+	    private static void createDirectory() throws IOException {
+	        File directory = new File(OUTPUT_FOLDER);
+	        if (!directory.exists()) {
+	            boolean created = directory.mkdirs();
+	            if (!created) {
+	                throw new IOException("No se pudo crear el directorio: " + OUTPUT_FOLDER);
+	            }
+	        }
+	    }
+	    
+	    /**
+	     * Generates the employee information file
+	     * @param count Number of employees to generate
+	     * @return List of employee IDs
+	     * @throws IOException if file writing fails
+	     */
+	    private static List<String> generateEmployeeFile(int count) throws IOException {
+	        List<String> employeeIds = new ArrayList<>();
+	        
+	        try (BufferedWriter writer = new BufferedWriter(new FileWriter(OUTPUT_FOLDER + "empleados.txt"))) {
+	            for (int i = 0; i < count; i++) {
+	                String idType = ID_PREFIXES[randomizer.nextInt(ID_PREFIXES.length)];
+	                String idNumber = String.format("%09d", 100000000 + randomizer.nextInt(900000000));
+	                String firstName = EMPLOYEE_FIRST_NAMES[randomizer.nextInt(EMPLOYEE_FIRST_NAMES.length)];
+	                String lastName = EMPLOYEE_LAST_NAMES[randomizer.nextInt(EMPLOYEE_LAST_NAMES.length)];
+	                
+	                String employeeId = idType + ":" + idNumber;
+	                String record = employeeId + ":" + firstName + ":" + lastName;
+	                
+	                writer.write(record);
+	                writer.newLine();
+	                
+	                employeeIds.add(employeeId);
+	            }
+	        }
+	        
+	        System.out.println("Archivo de empleados generado con " + count + " registros.");
+	        return employeeIds;
+	    }
+	    
+	    /**
+	     * Generates the merchandise information file
+	     * @param count Number of merchandise items to generate
+	     * @throws IOException if file writing fails
+	     */
+	    private static void generateMerchandiseFile(int count) throws IOException {
+	        try (BufferedWriter writer = new BufferedWriter(new FileWriter(OUTPUT_FOLDER + "mercancia.txt"))) {
+	            for (int i = 0; i < count; i++) {
+	                String code = "SKU" + String.format("%04d", i + 1);
+	                
+	                String name;
+	                if (i < MERCHANDISE.length) {
+	                    name = MERCHANDISE[i];
+	                } else {
+	                    name = MERCHANDISE[i % MERCHANDISE.length] + " " + (i / MERCHANDISE.length + 1);
+	                }
+	                
+	                String category = CATEGORIES[randomizer.nextInt(CATEGORIES.length)];
+	                
+	                // Generate price between 50,000 and 2,000,000
+	                double price = 50000 + randomizer.nextDouble() * 1950000;
+	                
+	                String record = code + ":" + name + ":" + category + ":" + String.format("%.2f", price);
+	                writer.write(record);
+	                writer.newLine();
+	            }
+	        }
+	        
+	        System.out.println("Archivo de mercancía generado con " + count + " registros.");
+	    }
+	    
+	    /**
+	     * Generates transaction files for each employee
+	     * @param employeeIds List of employee IDs
+	     * @param merchandiseCount Total number of merchandise items
+	     * @throws IOException if file writing fails
+	     */
+	    private static void generateTransactionFiles(List<String> employeeIds, int merchandiseCount) throws IOException {
+	        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+	        
+	        for (String employeeId : employeeIds) {
+	            String fileName = employeeId.replace(":", "_") + "_transacciones.txt";
+	            
+	            try (BufferedWriter writer = new BufferedWriter(new FileWriter(OUTPUT_FOLDER + fileName))) {
+	                // Write employee ID as first line
+	                writer.write(employeeId);
+	                writer.newLine();
+	                
+	                // Generate 1 to 8 transactions per employee
+	                int transactionCount = 1 + randomizer.nextInt(8);
+	                
+	                for (int i = 0; i < transactionCount; i++) {
+	                    // Generate transaction date (between 1 and 90 days ago)
+	                    LocalDate transactionDate = LocalDate.now().minusDays(1 + randomizer.nextInt(90));
+	                    String formattedDate = transactionDate.format(dateFormatter);
+	                    
+	                    // Select random merchandise
+	                    String skuCode = "SKU" + String.format("%04d", 1 + randomizer.nextInt(merchandiseCount));
+	                    
+	                    // Generate quantity between 1 and 5
+	                    int quantity = 1 + randomizer.nextInt(5);
+	                    
+	                    // Transaction record
+	                    String record = formattedDate + ":" + skuCode + ":" + quantity + ";";
+	                    writer.write(record);
+	                    writer.newLine();
+	                }
+	            }
+	        }
+	        
+	        System.out.println("Archivos de transacciones generados para " + employeeIds.size() + " empleados.");
+	    }
+	    
+	    /**
+	     * Creates a single transaction file for a specific employee
+	     * @param transactionCount Number of transactions to generate
+	     * @param employeeName Employee name (for filename)
+	     * @param employeeId Employee ID
+	     * @throws IOException if file writing fails
+	     */
+	    public static void createEmployeeTransactionFile(int transactionCount, String employeeName, String employeeId) throws IOException {
+	        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+	        
+	        // Create directory if it doesn't exist
+	        createDirectory();
+	        
+	        // Generate employee ID if not provided
+	        String finalEmployeeId = employeeId;
+	        if (finalEmployeeId == null || finalEmployeeId.isEmpty()) {
+	            String idType = ID_PREFIXES[randomizer.nextInt(ID_PREFIXES.length)];
+	            String idNumber = String.format("%09d", 100000000 + randomizer.nextInt(900000000));
+	            finalEmployeeId = idType + ":" + idNumber;
+	        }
+	        
+	        try (BufferedWriter writer = new BufferedWriter(new FileWriter(OUTPUT_FOLDER + "empleado_" + employeeName + "_transacciones.txt"))) {
+	            // Write employee ID as first line
+	            writer.write(finalEmployeeId);
+	            writer.newLine();
+	            
+	            for (int i = 0; i < transactionCount; i++) {
+	                // Generate transaction date (between 1 and 60 days ago)
+	                LocalDate transactionDate = LocalDate.now().minusDays(1 + randomizer.nextInt(60));
+	                String formattedDate = transactionDate.format(dateFormatter);
+	                
+	                // Select random merchandise
+	                String skuCode = "SKU" + String.format("%04d", 1 + randomizer.nextInt(15));
+	                
+	                // Generate quantity between 1 and 3
+	                int quantity = 1 + randomizer.nextInt(3);
+	                
+	                // Transaction record
+	                String record = formattedDate + ":" + skuCode + ":" + quantity + ";";
+	                writer.write(record);
+	                writer.newLine();
+	            }
+	        }
+	    }
+	}
